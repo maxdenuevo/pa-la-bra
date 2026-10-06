@@ -1,0 +1,111 @@
+@font-face {
+  font-family: 'Anton';
+  src: url('/fonts/anton-latin.woff2') format('woff2');
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Archivo';
+  src: url('/fonts/archivo-latin.woff2') format('woff2');
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+:root {
+  --rojo: #d62828;
+  --amarillo: #f7b801;
+  --azul: #1d3a8a;
+  --verde: #2a7d3e;
+  --negro: #111111;
+  --blanco: #ffffff;
+
+  --display: 'Anton', 'Impact', 'Arial Narrow', sans-serif;
+  --texto: 'Archivo', 'Helvetica Neue', Arial, sans-serif;
+
+  --borde: 5px;
+  --sombra: 7px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  background: var(--rojo);
+  color: var(--negro);
+  font-family: var(--texto);
+}
+
+/* Panel pintado: el fondo, el contorno y la sombra viven en ::before con el filtro áspero; el texto queda nítido */
+.cartel {
+  --fondo: var(--blanco);
+  --tinta: var(--negro);
+  position: relative;
+  isolation: isolate;
+  color: var(--tinta);
+  transform: rotate(var(--rot, 0deg));
+}
+
+.cartel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--fondo);
+  border: var(--borde) solid var(--negro);
+  box-shadow: var(--sombra) var(--sombra) 0 var(--negro);
+  filter: url(#aspero);
+}
+
+.c-blanco { --fondo: var(--blanco); --tinta: var(--negro); }
+.c-amarillo { --fondo: var(--amarillo); --tinta: var(--negro); }
+.c-rojo { --fondo: var(--rojo); --tinta: var(--blanco); }
+.c-azul { --fondo: var(--azul); --tinta: var(--blanco); }
+.c-verde { --fondo: var(--verde); --tinta: var(--blanco); }
+.c-negro { --fondo: var(--negro); --tinta: var(--blanco); }
+
+.rotulo {
+  font-family: var(--display);
+  font-weight: 400;
+  text-transform: uppercase;
+  line-height: 1;
+  letter-spacing: 0.01em;
+}
+
+/* Letra blanca con contorno negro y sombra dura, para títulos sobre rojo */
+.pintado {
+  color: var(--blanco);
+  -webkit-text-stroke: 0.06em var(--negro);
+  paint-order: stroke fill;
+  text-shadow: 0.06em 0.06em 0 var(--negro);
+}
+
+@keyframes pegar {
+  from {
+    transform: rotate(calc(var(--rot, 0deg) + 8deg)) scale(1.25);
+    opacity: 0;
+  }
+  to {
+    transform: rotate(var(--rot, 0deg)) scale(1);
+    opacity: 1;
+  }
+}
+
+.entra {
+  animation: pegar 420ms cubic-bezier(0.2, 0.7, 0.3, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .entra {
+    animation: none;
+  }
+}

@@ -1,0 +1,20 @@
+export const contenido = {
+  preguntaFase1: '¿Qué palabra pesa en tu vida hoy?',
+  ayudaFase1: 'Una sola palabra. Es anónimo.',
+  preguntaFase3: '¿Qué palabras nuevas pueden armar con estas sílabas?',
+  ayudaFase3: 'Junta sílabas de la ficha. Una palabra por envío.',
+  confirmacion: 'Tu palabra entró al muro.',
+  errorEnvio: 'No entró, intenta de nuevo.',
+  errorFormato: 'Una sola palabra, solo letras, entre 2 y 20.',
+  boton: 'Mandar',
+  revelacion: {
+    titulo: 'Esto hacían en los asentamientos de Curicó en 1968.',
+    cita: 'Antes estábamos ciegos, ahora ya se nos cayó la venda de los ojos.',
+    atribucion: 'Frase campesina recogida en un informe de ICIRA, citado en Muñoz Camus (2019).',
+    pie: 'Método psicosocial de Paulo Freire · universo vocabular, palabra generadora, círculo de cultura, familias silábicas.',
+  },
+  pieSala: 'Hecho por el grupo del Tema 1 con apoyo de IA generativa, declarado.',
+  palabrasDemo: ['deuda', 'pega', 'arriendo', 'micro', 'cae', 'sueldo', 'tierra', 'patrón', 'trabajo', 'estrés', 'lluvia', 'ciudad'],
+  elegirPalabra: '¿Con cuál palabra trabajamos?',
+  creacionesDemo: ['dado', 'dedo', 'duda', 'dudo', 'oda', 'odio', 'día', 'dio'],
+};

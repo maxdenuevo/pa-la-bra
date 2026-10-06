@@ -1,0 +1,720 @@
+---
+import Base from '../layouts/Base.astro';
+import Motivo from '../components/Motivo.astro';
+import { contenido } from '../contenido.js';
+const r = contenido.revelacion;
+---
+<Base titulo="pa·la·bra · sala" clase="sala">
+  <div id="escena" data-fase="1" data-qr="si" data-sel="no">
+    <Motivo tipo="sol" class="m-sol" />
+    <Motivo tipo="flor" class="m-flor" />
+    <Motivo tipo="mano" class="m-mano" />
+
+    <aside id="panel-qr" class="cartel c-amarillo" style="--rot:-1.5deg">
+      <h1 class="rotulo">{contenido.preguntaFase1}</h1>
+      <div id="qr" class="qr"></div>
+      <p id="url" class="url"></p>
+    </aside>
+
+    <h2 id="titulo" class="titulo rotulo pintado"></h2>
+
+    <section id="muro" class="muro" aria-label="Muro de palabras"></section>
+    <p id="contador" class="contador cartel c-negro rotulo" style="--rot:2deg">0 palabras</p>
+
+    <section id="ficha" class="ficha" aria-label="Ficha del descubrimiento"></section>
+    <section id="creaciones" class="creaciones" aria-label="Palabras nuevas"></section>
+
+    <section id="revelacion" class="revelacion">
+      <Motivo tipo="espiga" class="m-espiga izq" />
+      <Motivo tipo="espiga" class="m-espiga der" />
+      <h2 class="r-titulo cartel c-amarillo rotulo" style="--rot:-1.5deg">{r.titulo}</h2>
+      <blockquote class="r-cita cartel c-negro rotulo" style="--rot:1deg">
+        <span class="comilla">«</span>{r.cita}<span class="comilla">»</span>
+      </blockquote>
+      <p class="r-atribucion">{r.atribucion}</p>
+      <p class="r-pie cartel c-blanco" style="--rot:-0.5deg">{r.pie}</p>
+    </section>
+
+    <p id="estado" class="estado" hidden></p>
+    <footer class="pie">{contenido.pieSala}</footer>
+  </div>
+</Base>
+
+<style>
+  :global(body.sala) {
+    --borde: 10px;
+    --sombra: 14px;
+    --m: 3vw;
+    height: 100vh;
+    overflow: hidden;
+    cursor: default;
+  }
+
+  #escena {
+    position: fixed;
+    inset: 0;
+  }
+
+  #escena > :global(*) {
+    position: absolute;
+  }
+
+  /* Visibilidad por fase */
+  #panel-qr,
+  #titulo,
+  #muro,
+  #contador,
+  #ficha,
+  #creaciones,
+  #revelacion,
+  :global(.m-flor),
+  :global(.m-mano) {
+    display: none;
+  }
+
+  [data-qr='si'] #panel-qr,
+  [data-fase='1'] #muro,
+  [data-fase='1'] #contador,
+  [data-fase='1'] :global(.m-flor),
+  [data-fase='2'][data-sel='no'] #muro,
+  [data-fase='2'][data-sel='no'] #titulo,
+  [data-fase='2'][data-sel='si'] #ficha,
+  [data-fase='3'] #titulo,
+  [data-fase='3'] #ficha,
+  [data-fase='3'] #creaciones,
+  [data-fase='3'] :global(.m-mano) {
+    display: flex;
+  }
+
+  [data-fase='4'] #revelacion {
+    display: grid;
+  }
+
+  [data-fase='4'] :global(.m-sol) {
+    top: -9vh;
+    right: -6vh;
+    width: 34vh;
+  }
+
+  /* Panel del QR: grande en fase 1, esquina en las demás */
+  #panel-qr {
+    flex-direction: column;
+    align-items: center;
+    gap: 2.5vh;
+    z-index: 5;
+    padding: 4vh 2.5vw;
+  }
+
+  [data-fase='1'] #panel-qr {
+    left: var(--m);
+    top: 6vh;
+    bottom: 12vh;
+    width: 31vw;
+    justify-content: center;
+  }
+
+  #panel-qr h1 {
+    margin: 0;
+    font-size: 7.2vh;
+    text-align: center;
+  }
+
+  .qr {
+    width: 100%;
+    max-width: 44vh;
+    aspect-ratio: 1;
+    background: var(--blanco);
+    border: 6px solid var(--negro);
+  }
+
+  .qr :global(svg) {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .url {
+    margin: 0;
+    font-family: var(--texto);
+    font-weight: 900;
+    font-size: 3.4vh;
+    text-align: center;
+    word-break: break-all;
+  }
+
+  #escena:not([data-fase='1']) #panel-qr {
+    right: 2vw;
+    bottom: 9vh;
+    width: 22vh;
+    padding: 1.6vh;
+    gap: 1vh;
+  }
+
+  #escena:not([data-fase='1']) #panel-qr h1 {
+    display: none;
+  }
+
+  #escena:not([data-fase='1']) .url {
+    font-size: 1.8vh;
+  }
+
+  /* Muro */
+  .muro {
+    --tam: 10vh;
+    left: 36vw;
+    right: var(--m);
+    top: 4vh;
+    bottom: 12vh;
+    flex-wrap: wrap;
+    align-content: center;
+    justify-content: center;
+    gap: 2.4vh 1.4vw;
+    padding: 2vh 1vw;
+    overflow: hidden;
+  }
+
+  [data-qr='no'] .muro,
+  [data-fase='2'] .muro {
+    left: var(--m);
+  }
+
+  [data-fase='2'] .muro {
+    top: 17vh;
+  }
+
+  .muro :global(.cartel),
+  .creaciones :global(.cartel) {
+    font-size: calc(var(--tam) * var(--esc, 1));
+    padding: 0.28em 0.32em 0.2em;
+    margin: -0.12em -0.06em;
+    cursor: pointer;
+  }
+
+  [data-fase='2'] .muro :global(.cartel:hover) {
+    outline: 6px dashed var(--blanco);
+    outline-offset: 10px;
+  }
+
+  .muro :global(.n),
+  .creaciones :global(.n) {
+    position: absolute;
+    top: -0.38em;
+    right: -0.38em;
+    min-width: 1.5em;
+    padding: 0.18em 0.25em;
+    font-family: var(--texto);
+    font-weight: 900;
+    font-size: max(0.34em, 3vh);
+    line-height: 1;
+    text-align: center;
+    color: var(--negro);
+    background: var(--amarillo);
+    border: 4px solid var(--negro);
+    border-radius: 999px;
+  }
+
+  .contador {
+    right: 2.5vw;
+    bottom: 3vh;
+    margin: 0;
+    padding: 0.2em 0.5em 0.25em;
+    font-size: 4.6vh;
+    z-index: 4;
+  }
+
+  .titulo {
+    left: var(--m);
+    right: var(--m);
+    top: 3vh;
+    margin: 0;
+    font-size: 8vh;
+    justify-content: center;
+    text-align: center;
+    z-index: 3;
+  }
+
+  [data-fase='3'] .titulo {
+    font-size: 5.6vh;
+    right: 27vh;
+  }
+
+  /* Ficha */
+  .ficha {
+    --f-sil: 19vh;
+    --f-fam: 7.4vh;
+    left: var(--m);
+    right: var(--m);
+    top: 5vh;
+    bottom: 11vh;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6vh;
+  }
+
+  [data-fase='3'] .ficha {
+    --f-sil: 11vh;
+    --f-fam: 5.2vh;
+    right: auto;
+    width: 56vw;
+    top: 21vh;
+    gap: 4vh;
+  }
+
+  .ficha :global(.partida) {
+    display: flex;
+    align-items: center;
+    gap: 1.4vw;
+  }
+
+  .ficha :global(.silaba) {
+    font-size: var(--f-sil);
+    padding: 0.2em 0.24em 0.1em;
+  }
+
+  .ficha :global(.punto) {
+    font-size: var(--f-sil);
+  }
+
+  .ficha :global(.familias) {
+    display: flex;
+    flex-direction: column;
+    gap: 2.8vh;
+  }
+
+  .ficha :global(.fila) {
+    display: flex;
+    gap: 1.6vw;
+    justify-content: center;
+  }
+
+  .ficha :global(.fila .cartel) {
+    --borde: 7px;
+    --sombra: 9px;
+    font-size: var(--f-fam);
+    min-width: 2.6em;
+    padding: 0.2em 0.3em 0.12em;
+    text-align: center;
+  }
+
+  /* Creaciones */
+  .creaciones {
+    --tam: 7vh;
+    left: 62vw;
+    right: var(--m);
+    top: 21vh;
+    bottom: 12vh;
+    flex-wrap: wrap;
+    align-content: center;
+    justify-content: center;
+    gap: 2.4vh 1.2vw;
+    overflow: hidden;
+  }
+
+  /* Revelación */
+  .revelacion {
+    inset: 5vh 9vw 9vh;
+    align-content: center;
+    justify-items: center;
+    gap: 4vh;
+    text-align: center;
+  }
+
+  .r-titulo {
+    margin: 0;
+    padding: 0.2em 0.5em 0.25em;
+    font-size: 6.4vh;
+  }
+
+  .r-cita {
+    margin: 0;
+    padding: 0.35em 0.6em 0.4em;
+    font-size: 8.4vh;
+    line-height: 1.2;
+    max-width: 72vw;
+  }
+
+  .comilla {
+    color: var(--amarillo);
+    padding: 0 0.1em;
+  }
+
+  .r-atribucion {
+    margin: 0;
+    color: var(--blanco);
+    font-weight: 800;
+    font-size: 4.4vh;
+    max-width: 70vw;
+  }
+
+  .r-pie {
+    margin: 0;
+    padding: 0.5em 0.9em;
+    font-weight: 800;
+    font-size: 4.4vh;
+    max-width: 74vw;
+  }
+
+  :global(.m-espiga) {
+    position: absolute;
+    bottom: -4vh;
+    height: 62vh;
+  }
+
+  :global(.m-espiga.izq) {
+    left: -7vw;
+    transform: rotate(-8deg);
+  }
+
+  :global(.m-espiga.der) {
+    right: -7vw;
+    transform: rotate(8deg) scaleX(-1);
+  }
+
+  /* Motivos de marco */
+  :global(.m-sol) {
+    width: 26vh;
+    top: -8vh;
+    left: -6vh;
+    z-index: 0;
+  }
+
+  [data-fase='2'] :global(.m-sol),
+  [data-fase='3'] :global(.m-sol) {
+    left: auto;
+    right: -8vh;
+    top: -10vh;
+  }
+
+  :global(.m-flor) {
+    width: 18vh;
+    right: 22vh;
+    bottom: -6vh;
+  }
+
+  :global(.m-mano) {
+    width: 18vh;
+    right: 2vw;
+    top: 1vh;
+  }
+
+  :global(.m-sol),
+  :global(.m-flor),
+  :global(.m-mano),
+  :global(.m-espiga) {
+    pointer-events: none;
+  }
+
+  .pie {
+    left: var(--m);
+    bottom: 2.2vh;
+    color: var(--blanco);
+    font-weight: 700;
+    font-size: 2.4vh;
+    z-index: 6;
+  }
+
+  .estado {
+    top: 1.5vh;
+    right: 1.5vw;
+    margin: 0;
+    padding: 0.4em 0.8em;
+    background: var(--negro);
+    color: var(--amarillo);
+    font-weight: 900;
+    font-size: 2.4vh;
+    z-index: 9;
+  }
+</style>
+
+<script>
+  import qrcode from 'qrcode-generator';
+  import { contenido } from '../contenido.js';
+  import { silabear, familia } from '../lib/silabas.js';
+  import { normalizar } from '../lib/validar.js';
+  import { estaBloqueada } from '../lib/bloqueadas.js';
+  import { sesionActual, esSesionDefecto, cargarPalabras, escucharPalabras, canalFase } from '../lib/supabase.js';
+
+  const demo = new URLSearchParams(location.search).has('demo');
+  const sesion = sesionActual();
+  const CLAVE_OCULTAS = `pa-la-bra:ocultas:${demo ? 'demo' : sesion}`;
+  const COLORES = ['amarillo', 'blanco', 'negro', 'azul', 'amarillo', 'verde', 'blanco'];
+
+  const $ = (id) => document.getElementById(id);
+  const escena = $('escena');
+  const elMuro = $('muro');
+  const elCreaciones = $('creaciones');
+  const elFicha = $('ficha');
+  const elTitulo = $('titulo');
+  const elContador = $('contador');
+
+  const estado = { fase: 1, qr: true, sel: null, activa: 0 };
+  const muro = new Map();
+  const creaciones = new Map();
+  const vistos = new Set();
+  const historialOcultas = [];
+  let ocultas = new Set();
+  let bajoCursor = null;
+  let emisor = null;
+
+  try {
+    ocultas = new Set(JSON.parse(localStorage.getItem(CLAVE_OCULTAS) || '[]'));
+  } catch {}
+
+  const guardarOcultas = () => {
+    try {
+      localStorage.setItem(CLAVE_OCULTAS, JSON.stringify([...ocultas]));
+    } catch {}
+  };
+
+  function hash(texto) {
+    let h = 2166136261;
+    for (const c of texto) h = Math.imul(h ^ c.codePointAt(0), 16777619);
+    return h >>> 0;
+  }
+
+  const rotacion = (texto) => ((hash(texto) % 81) - 40) / 10;
+  const color = (texto) => COLORES[hash(texto + '·') % COLORES.length];
+
+  function cartel(texto, clase, rot) {
+    const el = document.createElement('div');
+    el.className = `cartel rotulo c-${clase}`;
+    el.style.setProperty('--rot', `${rot}deg`);
+    el.textContent = texto;
+    return el;
+  }
+
+  // Muro y creaciones
+
+  function agregar(fila) {
+    if (vistos.has(fila.id)) return;
+    vistos.add(fila.id);
+    const texto = normalizar(fila.texto);
+    if (!texto || estaBloqueada(texto)) return;
+
+    const mapa = fila.fase === 3 ? creaciones : muro;
+    const contenedor = fila.fase === 3 ? elCreaciones : elMuro;
+    const previo = mapa.get(texto);
+
+    if (previo) {
+      previo.n += 1;
+      previo.badge.textContent = `×${previo.n}`;
+      previo.badge.hidden = false;
+      previo.el.style.setProperty('--esc', Math.min(1 + 0.16 * (previo.n - 1), 1.7));
+      previo.el.classList.remove('entra');
+      void previo.el.offsetWidth;
+      previo.el.classList.add('entra');
+    } else {
+      const el = cartel(texto, color(texto), rotacion(texto));
+      el.classList.add('entra');
+      el.dataset.texto = texto;
+      const badge = document.createElement('span');
+      badge.className = 'n';
+      badge.hidden = true;
+      el.append(badge);
+      el.hidden = ocultas.has(texto);
+      contenedor.append(el);
+      mapa.set(texto, { n: 1, el, badge });
+    }
+    ajustarTamanos();
+  }
+
+  function ajustarTamanos() {
+    const visibles = [...muro.values()].filter((p) => !p.el.hidden);
+    const k = visibles.length;
+    const tam = k <= 8 ? 11 : k <= 16 ? 8.6 : k <= 28 ? 6.6 : k <= 45 ? 5.2 : 4.5;
+    elMuro.style.setProperty('--tam', `${tam}vh`);
+    const total = visibles.reduce((s, p) => s + p.n, 0);
+    elContador.textContent = `${total} ${total === 1 ? 'palabra' : 'palabras'}`;
+
+    const kc = [...creaciones.values()].filter((p) => !p.el.hidden).length;
+    elCreaciones.style.setProperty('--tam', `${kc <= 6 ? 7.4 : kc <= 14 ? 6 : 4.8}vh`);
+  }
+
+  function masRepetida() {
+    let mejor = null;
+    for (const [texto, p] of muro) {
+      if (!p.el.hidden && (!mejor || p.n > mejor.n)) mejor = { texto, n: p.n };
+    }
+    return mejor?.texto ?? null;
+  }
+
+  // Ficha del descubrimiento
+
+  const SIN_TILDE = { á: 'a', é: 'e', í: 'i', ó: 'o', ú: 'u', ü: 'u' };
+  function vocalDe(silaba) {
+    const s = silaba.replace(/^(qu|gu(?=[eéií]))/, 'x');
+    const v = s.match(/[aeoáéó]/) ?? s.match(/[iuíúü]/);
+    return v ? (SIN_TILDE[v[0]] ?? v[0]) : null;
+  }
+
+  function renderFicha() {
+    elFicha.replaceChildren();
+    if (!estado.sel) return;
+    const silabas = silabear(estado.sel);
+    estado.activa = Math.max(0, Math.min(estado.activa, silabas.length - 1));
+
+    const partida = document.createElement('div');
+    partida.className = 'partida';
+    silabas.forEach((s, i) => {
+      if (i > 0) {
+        const p = document.createElement('span');
+        p.className = 'punto rotulo pintado';
+        p.textContent = '·';
+        partida.append(p);
+      }
+      const activa = i === estado.activa;
+      partida.append(cartel(s, activa ? 'amarillo' : 'blanco', activa ? -2 : rotacion(s) / 2));
+    });
+    partida.querySelectorAll('.cartel').forEach((el) => el.classList.add('silaba'));
+
+    const familias = document.createElement('div');
+    familias.className = 'familias';
+    const filas = new Map();
+    silabas.forEach((s, i) => {
+      const miembros = familia(s);
+      const clave = miembros.join(' ');
+      if (!filas.has(clave)) filas.set(clave, { miembros, propias: new Set(), activa: false });
+      const f = filas.get(clave);
+      const v = vocalDe(s);
+      if (v) f.propias.add('aeiou'.indexOf(v));
+      if (i === estado.activa) f.activa = true;
+    });
+    for (const { miembros, propias, activa } of filas.values()) {
+      const fila = document.createElement('div');
+      fila.className = 'fila';
+      miembros.forEach((m, j) => {
+        const clase = propias.has(j) ? 'rojo' : activa ? 'amarillo' : 'blanco';
+        fila.append(cartel(m, clase, rotacion(m + j) / 2));
+      });
+      familias.append(fila);
+    }
+
+    elFicha.append(partida, familias);
+  }
+
+  // Estado general
+
+  function aplicar() {
+    bajoCursor = null;
+    escena.dataset.fase = String(estado.fase);
+    escena.dataset.qr = estado.qr ? 'si' : 'no';
+    escena.dataset.sel = estado.sel ? 'si' : 'no';
+    elTitulo.textContent = estado.fase === 3 ? contenido.preguntaFase3 : contenido.elegirPalabra;
+    renderFicha();
+    ajustarTamanos();
+  }
+
+  let creacionesDemoLanzadas = false;
+  function irAFase(f) {
+    if (f !== estado.fase) estado.qr = f === 1;
+    estado.fase = f;
+    if (f === 1) estado.sel = null;
+    if (f === 3 && !estado.sel) estado.sel = masRepetida();
+    if (f === 3 && demo && !creacionesDemoLanzadas) {
+      creacionesDemoLanzadas = true;
+      contenido.creacionesDemo.forEach((t, i) =>
+        setTimeout(() => agregar({ id: `dc${i}`, texto: t, fase: 3 }), 700 + i * 650),
+      );
+    }
+    emisor?.emitir(f);
+    aplicar();
+  }
+
+  function seleccionar(texto) {
+    estado.sel = texto;
+    estado.activa = 0;
+    if (estado.fase === 1) irAFase(2);
+    else aplicar();
+  }
+
+  function ocultar() {
+    const texto = bajoCursor ?? (estado.fase === 2 || estado.fase === 3 ? estado.sel : null);
+    if (!texto) return;
+    ocultas.add(texto);
+    historialOcultas.push(texto);
+    guardarOcultas();
+    for (const mapa of [muro, creaciones]) if (mapa.has(texto)) mapa.get(texto).el.hidden = true;
+    if (estado.sel === texto) estado.sel = null;
+    bajoCursor = null;
+    aplicar();
+  }
+
+  function deshacerOcultar() {
+    const texto = historialOcultas.pop();
+    if (!texto) return;
+    ocultas.delete(texto);
+    guardarOcultas();
+    for (const mapa of [muro, creaciones]) if (mapa.has(texto)) mapa.get(texto).el.hidden = false;
+    aplicar();
+  }
+
+  function pantallaCompleta() {
+    if (document.fullscreenElement) document.exitFullscreen();
+    else document.documentElement.requestFullscreen?.();
+  }
+
+  addEventListener('keydown', (e) => {
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    const tecla = e.key.toLowerCase();
+    if (['1', '2', '3', '4'].includes(tecla)) irAFase(Number(tecla));
+    else if (tecla === 'h') ocultar();
+    else if (tecla === 'u') deshacerOcultar();
+    else if (tecla === 'q') {
+      estado.qr = !estado.qr;
+      aplicar();
+    } else if (tecla === 'f') pantallaCompleta();
+    else if (tecla === 'r') {
+      estado.sel = null;
+      estado.activa = 0;
+      irAFase(1);
+    } else if (tecla === 'escape' && estado.fase === 2) {
+      estado.sel = null;
+      aplicar();
+    } else if ((tecla === 'arrowleft' || tecla === 'arrowright') && estado.sel) {
+      estado.activa += tecla === 'arrowleft' ? -1 : 1;
+      renderFicha();
+    } else return;
+    e.preventDefault();
+  });
+
+  elMuro.addEventListener('click', (e) => {
+    const el = e.target.closest('[data-texto]');
+    if (el) seleccionar(el.dataset.texto);
+  });
+
+  document.addEventListener('mouseover', (e) => {
+    bajoCursor = e.target.closest?.('[data-texto]')?.dataset.texto ?? null;
+  });
+
+  // QR
+  const urlAudiencia = `${location.origin}/${esSesionDefecto(sesion) ? '' : `?s=${sesion}`}`;
+  const qr = qrcode(0, 'M');
+  qr.addData(urlAudiencia);
+  qr.make();
+  $('qr').innerHTML = qr.createSvgTag({ cellSize: 8, margin: 2, scalable: true });
+  $('url').textContent = urlAudiencia.replace(/^https?:\/\//, '').replace(/\/$/, '');
+
+  // Datos
+  function sinRed() {
+    const el = $('estado');
+    el.textContent = 'Sin conexión · usa ?demo de respaldo';
+    el.hidden = false;
+  }
+
+  if (demo) {
+    const lista = [...contenido.palabrasDemo, 'deuda', 'arriendo', 'deuda', 'sueldo'];
+    lista.forEach((t, i) => setTimeout(() => agregar({ id: `d${i}`, texto: t, fase: 1 }), 500 + i * 380));
+  } else {
+    escucharPalabras(sesion, agregar, sinRed).catch(sinRed);
+    cargarPalabras(sesion).then((filas) => filas.forEach(agregar)).catch(sinRed);
+    canalFase(sesion)
+      .then((c) => {
+        emisor = c;
+        setInterval(() => emisor.emitir(estado.fase), 5000);
+      })
+      .catch(() => {});
+  }
+
+  aplicar();
+</script>

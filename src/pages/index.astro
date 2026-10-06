@@ -1,0 +1,239 @@
+---
+import Base from '../layouts/Base.astro';
+import Motivo from '../components/Motivo.astro';
+import { contenido } from '../contenido.js';
+---
+<Base titulo="pa·la·bra" clase="audiencia">
+  <main>
+    <p class="marca rotulo">pa·la·bra</p>
+
+    <h1 id="pregunta" class="rotulo pintado">{contenido.preguntaFase1}</h1>
+    <p id="ayuda" class="ayuda">{contenido.ayudaFase1}</p>
+
+    <form id="form" novalidate>
+      <label class="campo cartel c-blanco" style="--rot:-1.5deg">
+        <span class="oculto">Tu palabra</span>
+        <input
+          id="palabra"
+          name="palabra"
+          type="text"
+          maxlength="20"
+          autocomplete="off"
+          autocapitalize="off"
+          autocorrect="off"
+          spellcheck="false"
+          enterkeyhint="send"
+          placeholder="tu palabra"
+          required
+        />
+      </label>
+      <button id="boton" class="boton cartel c-amarillo rotulo" style="--rot:1deg" type="submit">{contenido.boton}</button>
+    </form>
+
+    <p id="mensaje" class="mensaje cartel rotulo" role="status" aria-live="polite" hidden></p>
+  </main>
+
+  <Motivo tipo="sol" class="sol" />
+</Base>
+
+<style>
+  :global(body.audiencia) {
+    --borde: 5px;
+    --sombra: 7px;
+    min-height: 100dvh;
+    overflow-x: hidden;
+  }
+
+  main {
+    position: relative;
+    z-index: 1;
+    max-width: 34rem;
+    margin: 0 auto;
+    padding: 1.25rem 1.25rem 3rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+  }
+
+  .marca {
+    margin: 0;
+    font-size: 1.6rem;
+    color: var(--amarillo);
+    -webkit-text-stroke: 0.08em var(--negro);
+    paint-order: stroke fill;
+  }
+
+  h1 {
+    margin: 0.4rem 0 0;
+    font-size: clamp(2.6rem, 13vw, 4.4rem);
+    line-height: 0.98;
+  }
+
+  .ayuda {
+    margin: 0;
+    color: var(--blanco);
+    font-weight: 800;
+    font-size: 1.15rem;
+  }
+
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.3rem;
+    margin-top: 0.4rem;
+  }
+
+  .campo {
+    display: block;
+    padding: 0.4rem 0.9rem;
+  }
+
+  input {
+    width: 100%;
+    border: 0;
+    background: transparent;
+    font-family: var(--display);
+    font-size: 2.6rem;
+    text-transform: uppercase;
+    color: var(--negro);
+    padding: 0.2rem 0;
+    outline: none;
+  }
+
+  input::placeholder {
+    color: #8a8a8a;
+  }
+
+  .campo:focus-within {
+    outline: 4px dashed var(--amarillo);
+    outline-offset: 10px;
+  }
+
+  .boton {
+    border: 0;
+    background: none;
+    font-size: 2.4rem;
+    padding: 0.7rem 1rem 0.8rem;
+    cursor: pointer;
+    transition: translate 80ms;
+  }
+
+  .boton:active:not(:disabled) {
+    translate: 4px 4px;
+  }
+
+  .boton:disabled {
+    --fondo: var(--blanco);
+    cursor: default;
+  }
+
+  .mensaje {
+    margin: 0.6rem 0 0;
+    padding: 0.8rem 1rem;
+    font-size: 1.7rem;
+    --rot: -1deg;
+  }
+
+  .oculto {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+
+  :global(.sol) {
+    position: fixed;
+    right: -70px;
+    bottom: -70px;
+    width: 230px;
+    z-index: 0;
+    pointer-events: none;
+  }
+</style>
+
+<script>
+  import { contenido } from '../contenido.js';
+  import { normalizar } from '../lib/validar.js';
+  import { sesionActual, enviarPalabra, canalFase } from '../lib/supabase.js';
+
+  const ENFRIAMIENTO = 10_000;
+  const CLAVE = 'pa-la-bra:ultimo';
+
+  const sesion = sesionActual();
+  const form = document.getElementById('form');
+  const input = document.getElementById('palabra');
+  const boton = document.getElementById('boton');
+  const mensaje = document.getElementById('mensaje');
+  const pregunta = document.getElementById('pregunta');
+  const ayuda = document.getElementById('ayuda');
+
+  let fase = 1;
+  let enviando = false;
+
+  const leerUltimo = () => {
+    try {
+      return Number(localStorage.getItem(CLAVE)) || 0;
+    } catch {
+      return 0;
+    }
+  };
+  const guardarUltimo = (t) => {
+    try {
+      localStorage.setItem(CLAVE, String(t));
+    } catch {}
+  };
+
+  function avisar(texto, color) {
+    mensaje.textContent = texto;
+    mensaje.className = `mensaje cartel rotulo c-${color} entra`;
+    mensaje.hidden = false;
+  }
+
+  function actualizarBoton() {
+    const resta = Math.ceil((leerUltimo() + ENFRIAMIENTO - Date.now()) / 1000);
+    if (enviando) {
+      boton.disabled = true;
+      boton.textContent = 'Mandando…';
+    } else if (resta > 0) {
+      boton.disabled = true;
+      boton.textContent = `Espera ${resta} s`;
+      setTimeout(actualizarBoton, 250);
+    } else {
+      boton.disabled = false;
+      boton.textContent = contenido.boton;
+    }
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (boton.disabled) return;
+    const palabra = normalizar(input.value);
+    if (!palabra) {
+      avisar(contenido.errorFormato, 'negro');
+      input.focus();
+      return;
+    }
+    enviando = true;
+    actualizarBoton();
+    const ok = await enviarPalabra(sesion, palabra, fase);
+    enviando = false;
+    if (ok) {
+      input.value = '';
+      guardarUltimo(Date.now());
+      avisar(contenido.confirmacion, 'verde');
+    } else {
+      avisar(contenido.errorEnvio, 'negro');
+    }
+    actualizarBoton();
+  });
+
+  function ponerFase(f) {
+    fase = f === 3 ? 3 : 1;
+    pregunta.textContent = fase === 3 ? contenido.preguntaFase3 : contenido.preguntaFase1;
+    ayuda.textContent = fase === 3 ? contenido.ayudaFase3 : contenido.ayudaFase1;
+  }
+
+  actualizarBoton();
+  addEventListener('load', () => canalFase(sesion, ponerFase).catch(() => {}));
+</script>
