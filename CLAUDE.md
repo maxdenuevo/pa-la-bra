@@ -232,7 +232,6 @@ Textos de interfaz (editables en `src/contenido.js`).
   - Cita. "Antes estábamos ciegos, ahora ya se nos cayó la venda de los ojos."
   - Atribución. "Frase campesina recogida en un informe de ICIRA, citado en Muñoz Camus (2019)."
   - Pie. "Método psicosocial de Paulo Freire · universo vocabular, palabra generadora, círculo de cultura, familias silábicas."
-- Pie permanente de `/sala`, discreto. "Hecho por el grupo del Tema 1 con apoyo de IA generativa, declarado."
 
 Palabras precargadas para `?demo`. deuda, pega, arriendo, micro, cae, sueldo, tierra, patrón, trabajo, estrés, lluvia, ciudad.
 

@@ -13,7 +13,6 @@ export const contenido = {
     atribucion: 'Frase campesina recogida en un informe de ICIRA, citado en Muñoz Camus (2019).',
     pie: 'Método psicosocial de Paulo Freire · universo vocabular, palabra generadora, círculo de cultura, familias silábicas.',
   },
-  pieSala: 'Hecho por el grupo del Tema 1 con apoyo de IA generativa, declarado.',
   palabrasDemo: ['deuda', 'pega', 'arriendo', 'micro', 'cae', 'sueldo', 'tierra', 'patrón', 'trabajo', 'estrés', 'lluvia', 'ciudad'],
   elegirPalabra: '¿Con cuál palabra trabajamos?',
   creacionesDemo: ['dado', 'dedo', 'duda', 'dudo', 'oda', 'odio', 'día', 'dio'],
